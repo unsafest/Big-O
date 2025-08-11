@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Big-O</title>
+  <meta name="description" content="Big-O notation and algorithm complexity">
+  <!-- Un-minified version -->
+  <link rel="stylesheet" href="https://unpkg.com/simpledotcss/simple.css">
+    <style>
+    #visualizer {
+      display: flex;
+      align-items: flex-end;
+      height: 400px;
+      width: 100%;
+      border: 1px solid #ccc;
+      margin: 20px 0;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+    
+    .bar {
+      background-color: #3498db;
+      margin: 0 1px;
+      transition: all 0.3s ease;
+      min-width: 2px;
+    }
+    
+    .bar.comparing {
+      background-color: #e74c3c;
+    }
+    
+    .bar.swapping {
+      background-color: #f39c12;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Big-O Notation</h1>
+  </header>
+
+  <main>
+    <p>Welcome to the Big-O notation study guide.</p>
+    <div id="visualizer"></div>
+    <div id="controls">
+      <div>
+        <h3>Select Sorting Algorithm</h3>
+        <label><input type="radio" id="bubble" name="sort-algo" value="bubble" checked> Bubble sort</label>
+        <label><input type="radio" id="selection" name="sort-algo" value="selection"> Selection sort</label>
+        <label><input type="radio" id="insertion" name="sort-algo" value="insertion"> Insertion sort</label>
+      </div>
+      <div>
+        <h3>Select Array Type</h3>
+        <label><input type="radio" name="arrayType" value="random" checked> Random</label>
+        <label><input type="radio" name="arrayType" value="sorted"> Sorted</label>
+        <label><input type="radio" name="arrayType" value="reversed"> Reversed</label>
+      </div>
+      <br>
+      <button onClick="sort()">Start sort</button>
+      <button onClick="reset()">Reset</button>
+    </div>
+  </main>
+
+  <footer>
+    <a href="https://github.com/unsafest">github</a>
+  </footer>
+</body>
+<script src="main.js"></script>
+
+</html>
