@@ -1,8 +1,9 @@
 const visualizer = document.getElementById("visualizer");
 let array = [];
+let isSorting = false;
 
 function generateArray(type) {
-    array = Array.from({length: 51}, (_, i) => i);
+    array = Array.from({length: 51}, (_, i) => i + 1);
     if (type === "random") array.sort(() => Math.random() - 0.5);
     if (type === "reversed") array.reverse();
     renderBars();
@@ -20,6 +21,7 @@ function renderBars(compare = [], swap = []) {
         visualizer.appendChild(bar);
     });
 }
+
 generateArray("random");
 
 function getSelectedRadioValue(name) {
@@ -33,17 +35,29 @@ function getSelectedRadioValue(name) {
 }
 
 function sort() {
+    isSorting = true;
     const algo = getSelectedRadioValue("sort-algo")
     if (algo === "bubble") {
         bubbleSort(array);
     }
+    else if (algo === "selection") {
+        selectionSort(array);
+    }
 }
 
-/** ----------- Sorting Algorithms ----------- */
+function reset() {
+    generateArray("random");
+    isSorting = false;
+    
+}
 
+/** ----------- -----------  Sorting Algorithms ----------- ----------- */
+
+/** ----------- -----------  Bubble Sort ----------- ----------- */
 async function bubbleSort(array) {
     let n = array.length
     for (let i = 0; i < n - 1; i++) {
+        if (!isSorting) return;
         let swapped = false
         for (let j = 0; j < n - i - 1; j++) {
             //renderBars([j, j + 1]);
@@ -58,4 +72,28 @@ async function bubbleSort(array) {
         if (!swapped) break
     }
     renderBars();
+    isSorting = false;
+}
+
+/** ----------- -----------  Selection Sort ----------- ----------- */
+async function selectionSort(array) {
+    let n = array.length;
+    for (let i = 0; i < n - 1; i++) {
+        if (!isSorting) return;
+        let minIndex = i;
+        for (let j = i + 1; j < n; j++) {
+            if (array[j] < array[minIndex]) {
+                minIndex = j;
+            }
+        }
+        [array[i], array[minIndex]] = [array[minIndex], array[i]];
+        renderBars([], [i, minIndex]);
+        await new Promise(resolve => setTimeout(resolve, 40));
+    }
+    isSorting = false;
+}
+
+/** ----------- -----------  Insertion Sort ----------- ----------- */
+function insertionSort(array) {
+
 }
