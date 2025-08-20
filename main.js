@@ -43,6 +43,9 @@ function sort() {
     else if (algo === "selection") {
         selectionSort(array);
     }
+    else if (algo === "insertion") {
+        insertionSort(array);
+    }
 }
 
 function reset() {
@@ -94,6 +97,21 @@ async function selectionSort(array) {
 }
 
 /** ----------- -----------  Insertion Sort ----------- ----------- */
-function insertionSort(array) {
+async function insertionSort(array) {
+    let arr = [...array]
+    let n = arr.length;
 
+    for (let i = 1; i < n; i++) {
+        let key = array[i]
+        let j = i - 1; 
+
+        while (j >= 0 && array[j] > key) {
+            array[j + 1] = array[j];
+            j--;
+        }
+        array[j + 1] = key;
+        renderBars([], [j + 1, i]);
+        await new Promise(resolve => setTimeout(resolve, 40));
+    }
+    isSorting = false;
 }
