@@ -110,8 +110,7 @@ async function selectionSort(array) {
 
 /** ----------- -----------  Insertion Sort ----------- ----------- */
 async function insertionSort(array) {
-    let arr = [...array]
-    let n = arr.length;
+    let n = array.length;
 
     for (let i = 1; i < n; i++) {
         let key = array[i]
