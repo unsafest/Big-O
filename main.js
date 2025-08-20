@@ -21,7 +21,6 @@ function renderBars(compare = [], swap = []) {
         visualizer.appendChild(bar);
     });
 }
-
 generateArray("random");
 
 function getSelectedRadioValue(name) {
@@ -36,15 +35,28 @@ function getSelectedRadioValue(name) {
 
 function sort() {
     isSorting = true;
-    const algo = getSelectedRadioValue("sort-algo")
-    if (algo === "bubble") {
-        bubbleSort(array);
-    }
-    else if (algo === "selection") {
-        selectionSort(array);
-    }
-    else if (algo === "insertion") {
-        insertionSort(array);
+    const algo = getSelectedRadioValue("sort-algo");
+    switch (algo) {
+        case "bubble":
+            bubbleSort(array);
+            break;
+        case "selection":
+            selectionSort(array);
+            break;
+        case "insertion":
+            insertionSort(array);
+            break;
+        case "merge":
+            mergeSort(array);
+            break;
+        case "quick":
+            quickSort(array);
+            break;
+        case "heap":
+            heapSort(array);
+            break;
+        default:
+            break;
     }
 }
 
