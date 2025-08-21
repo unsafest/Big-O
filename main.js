@@ -1,9 +1,11 @@
 const visualizer = document.getElementById("visualizer");
 let array = [];
-let isSorting = false;
+let arrLen = 51; // Array length
+const delay = 40; // Algo delay 
+let controller = null; // AbortController
 
 function generateArray(type) {
-    array = Array.from({length: 51}, (_, i) => i + 1);
+    array = Array.from({length: arrLen}, (_, i) => i + 1);
     if (type === "random") array.sort(() => Math.random() - 0.5);
     if (type === "reversed") array.reverse();
     renderBars();
@@ -21,7 +23,16 @@ function renderBars(compare = [], swap = []) {
         visualizer.appendChild(bar);
     });
 }
-generateArray("random");
+
+let arrayType = document.querySelectorAll('input[name="arrayType"]');
+
+arrayType.forEach((radio) => {
+    radio.addEventListener('change', (event) => {
+        generateArray(event.target.value);
+    })
+})
+
+generateArray(getSelectedRadioValue("arrayType") || "random");
 
 function getSelectedRadioValue(name) {
     const radios = document.getElementsByName(name);
@@ -30,30 +41,34 @@ function getSelectedRadioValue(name) {
             return radio.value;
         }
     }
-    return null;
+    return "random";
 }
 
 function sort() {
-    isSorting = true;
+    // AbortController
+    if (controller) controller.abort();
+    controller = new AbortController();
+    const signal = controller.signal;
+
     const algo = getSelectedRadioValue("sort-algo");
     switch (algo) {
         case "bubble":
-            bubbleSort(array);
+            bubbleSort(array, signal);
             break;
         case "selection":
-            selectionSort(array);
+            selectionSort(array, signal);
             break;
         case "insertion":
-            insertionSort(array);
+            insertionSort(array, signal);
             break;
         case "merge":
-            mergeSort(array);
+            mergeSort(array, signal);
             break;
         case "quick":
-            quickSort(array);
+            quickSort(array, signal);
             break;
         case "heap":
-            heapSort(array);
+            heapSort(array, signal);
             break;
         default:
             break;
@@ -61,40 +76,40 @@ function sort() {
 }
 
 function reset() {
-    generateArray("random");
-    isSorting = false;
-    
+    if (controller) controller.abort();
+    controller = null;
+    const type = getSelectedRadioValue("arrayType") || "random";
+    generateArray(type);
+    renderBars();
 }
 
 /** ----------- -----------  Sorting Algorithms ----------- ----------- */
 
 /** ----------- -----------  Bubble Sort ----------- ----------- */
-async function bubbleSort(array) {
+async function bubbleSort(array, signal) {
     let n = array.length
     for (let i = 0; i < n - 1; i++) {
-        if (!isSorting) return;
+        if (signal.aborted) return;
         let swapped = false
         for (let j = 0; j < n - i - 1; j++) {
-            //renderBars([j, j + 1]);
-            //await new Promise(resolve => setTimeout(resolve, 40));
+            if (signal.aborted) return;
             if (array[j] > array[j + 1]) {
                 [array[j], array[j + 1]] = [array[j + 1], array[j]];
                 renderBars([], [j, j + 1]);
-                await new Promise(resolve => setTimeout(resolve, 40));
+                await new Promise(resolve => setTimeout(resolve, delay));
                 swapped = true
             }
         }
         if (!swapped) break
     }
     renderBars();
-    isSorting = false;
 }
 
 /** ----------- -----------  Selection Sort ----------- ----------- */
-async function selectionSort(array) {
+async function selectionSort(array, signal) {
     let n = array.length;
     for (let i = 0; i < n - 1; i++) {
-        if (!isSorting) return;
+        if (signal.aborted) return;
         let minIndex = i;
         for (let j = i + 1; j < n; j++) {
             if (array[j] < array[minIndex]) {
@@ -103,16 +118,15 @@ async function selectionSort(array) {
         }
         [array[i], array[minIndex]] = [array[minIndex], array[i]];
         renderBars([], [i, minIndex]);
-        await new Promise(resolve => setTimeout(resolve, 40));
+        await new Promise(resolve => setTimeout(resolve, delay));
     }
-    isSorting = false;
 }
 
 /** ----------- -----------  Insertion Sort ----------- ----------- */
-async function insertionSort(array) {
+async function insertionSort(array, signal) {
     let n = array.length;
-
     for (let i = 1; i < n; i++) {
+        if (signal.aborted) return;
         let key = array[i]
         let j = i - 1; 
 
@@ -122,7 +136,6 @@ async function insertionSort(array) {
         }
         array[j + 1] = key;
         renderBars([], [j + 1, i]);
-        await new Promise(resolve => setTimeout(resolve, 40));
+        await new Promise(resolve => setTimeout(resolve, delay));
     }
-    isSorting = false;
 }
