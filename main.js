@@ -1,8 +1,8 @@
 const visualizer = document.getElementById("visualizer");
 let array = [];
-let arrLen = 51; // Array length
-const delay = 40; // Algo delay 
-let controller = null; // AbortController
+let arrLen = 51;
+const delay = 40;
+let controller = null; // for AbortController()
 
 function generateArray(type) {
     array = Array.from({length: arrLen}, (_, i) => i + 1);
@@ -139,3 +139,44 @@ async function insertionSort(array, signal) {
         await new Promise(resolve => setTimeout(resolve, delay));
     }
 }
+
+/** ----------- -----------  Merge Sort ----------- ----------- */
+async function mergeSort(array, signal, offset = 0) {
+    const n = array.length;
+    if (n <= 1) return;
+
+    const left = array.slice(0, Math.floor(n / 2));
+    const right = array.slice(Math.floor(n / 2));
+    
+    await mergeSort(left, signal, offset );
+    await mergeSort(right, signal, offset + Math.floor(n/2));
+    
+    let i = 0, j = 0, k = 0;
+    while (i < left.length && j < right.length) {
+        renderBars([k], [offset + i, offset + Math.floor(n/2) + j]);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        if (left[i] < right[j]) {
+            array[k] = left[i];
+            k++;
+            i++;
+        } else {
+            array[k] = right[j];
+            k++;
+            j++;
+        }
+    }
+    // cleanup
+    while (i < left.length) {
+        array[k++] = left[i++];
+    }
+    while (j < right.length) {
+        array[k++] = right[j++];
+    }
+    renderBars();
+}
+
+
+
+/** ----------- -----------  Quick Sort ----------- ----------- */
+
+/** ----------- -----------  Heap Sort ----------- ----------- */
