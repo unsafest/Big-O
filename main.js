@@ -93,8 +93,10 @@ async function bubbleSort(array, signal) {
         let swapped = false
         for (let j = 0; j < n - i - 1; j++) {
             if (signal.aborted) return;
+
             if (array[j] > array[j + 1]) {
                 [array[j], array[j + 1]] = [array[j + 1], array[j]];
+                // Show only swaps
                 renderBars([], [j, j + 1]);
                 await new Promise(resolve => setTimeout(resolve, delay));
                 swapped = true
@@ -112,14 +114,20 @@ async function selectionSort(array, signal) {
         if (signal.aborted) return;
         let minIndex = i;
         for (let j = i + 1; j < n; j++) {
+            if (signal.aborted) return;
+
             if (array[j] < array[minIndex]) {
                 minIndex = j;
             }
         }
-        [array[i], array[minIndex]] = [array[minIndex], array[i]];
-        renderBars([], [i, minIndex]);
-        await new Promise(resolve => setTimeout(resolve, delay));
+        // Show only swaps
+        if (minIndex !== i) {
+            [array[i], array[minIndex]] = [array[minIndex], array[i]];
+            renderBars([], [i, minIndex]);
+            await new Promise(resolve => setTimeout(resolve, delay));
+        }
     }
+    renderBars();
 }
 
 /** ----------- -----------  Insertion Sort ----------- ----------- */
@@ -131,51 +139,72 @@ async function insertionSort(array, signal) {
         let j = i - 1; 
 
         while (j >= 0 && array[j] > key) {
+            if (signal.aborted) return;
             array[j + 1] = array[j];
             j--;
         }
         array[j + 1] = key;
-        renderBars([], [j + 1, i]);
+        // Show only final placement (like other algorithms show key operations)
+        renderBars([], [j + 1]);
         await new Promise(resolve => setTimeout(resolve, delay));
-    }
-}
-
-/** ----------- -----------  Merge Sort ----------- ----------- */
-async function mergeSort(array, signal, offset = 0) {
-    const n = array.length;
-    if (n <= 1) return;
-
-    const left = array.slice(0, Math.floor(n / 2));
-    const right = array.slice(Math.floor(n / 2));
-    
-    await mergeSort(left, signal, offset );
-    await mergeSort(right, signal, offset + Math.floor(n/2));
-    
-    let i = 0, j = 0, k = 0;
-    while (i < left.length && j < right.length) {
-        renderBars([k], [offset + i, offset + Math.floor(n/2) + j]);
-        await new Promise(resolve => setTimeout(resolve, delay));
-        if (left[i] < right[j]) {
-            array[k] = left[i];
-            k++;
-            i++;
-        } else {
-            array[k] = right[j];
-            k++;
-            j++;
-        }
-    }
-    // cleanup
-    while (i < left.length) {
-        array[k++] = left[i++];
-    }
-    while (j < right.length) {
-        array[k++] = right[j++];
     }
     renderBars();
 }
 
+/** ----------- -----------  Merge Sort ----------- ----------- */
+async function mergeSort(arr, signal, offset = 0) {
+    if (signal.aborted || arr.length <= 1) return;
 
+    const middle = Math.floor(arr.length / 2);
+    const left = arr.slice(0, middle);
+    const right = arr.slice(middle);
+
+    await mergeSort(left, signal, offset);
+    if (signal.aborted) return;
+    await mergeSort(right, signal, offset + middle);
+    if (signal.aborted) return;
+
+    await mergeArrays(arr, left, right, signal, offset);
+}
+
+async function mergeArrays(arr, left, right, signal, offset) {
+    let i = 0, j = 0, k = 0;
+
+    while (i < left.length && j < right.length) {
+        if (signal.aborted) return;
+        
+        if (left[i] < right[j]) {
+            arr[k] = left[i++];
+        } else {
+            arr[k] = right[j++];
+        }
+        array[offset + k] = arr[k]
+        // Show only writes
+        renderBars([], [offset + k]);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        k++
+    }
+    // cleanup
+    while (i < left.length) {
+        if (signal.aborted) return;
+        arr[k] = left[i++];
+        array[offset + k] = arr[k]
+        // Show only writes
+        renderBars([], [offset + k]);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        k++;
+    }
+    while (j < right.length) {
+        if (signal.aborted) return;
+        arr[k] = right[j++];
+        array[offset + k] = arr[k]
+        // Show only writes
+        renderBars([], [offset + k]);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        k++;
+    }
+    renderBars();
+}
 
 /** ----------- -----------  Quick Sort ----------- ----------- */
 
