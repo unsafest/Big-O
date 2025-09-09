@@ -207,5 +207,47 @@ async function mergeArrays(arr, left, right, signal, offset) {
 }
 
 /** ----------- -----------  Quick Sort ----------- ----------- */
+async function quickSort(arr, signal, low = 0, high = arr.length - 1) {
+    if (low >= high || signal.aborted) return;
+
+    const pivotIndex = await partition(arr, signal, low, high);
+    if (signal.aborted || pivotIndex === undefined) return;
+
+    await quickSort(arr, signal, low, pivotIndex - 1);
+    if (signal.aborted) return; // Critical to check abort after first recursive call
+    await quickSort(arr, signal, pivotIndex + 1, high);
+
+}
+async function partition(arr, signal, low, high) {
+    if (signal.aborted) return undefined;
+
+    const randomIndex = Math.floor(Math.random() * (high - low + 1)) + low;
+    [arr[randomIndex], arr[high]] = [arr[high], arr[randomIndex]];
+
+    renderBars([], [randomIndex, high]);
+    await new Promise(resolve => setTimeout(resolve, delay));
+
+    let pivot = arr[high];
+    let i = low - 1;
+
+    for (let j = low; j < high; j++) {
+        if (signal.aborted) return;
+
+        if (arr[j] < pivot) {
+            i++;
+            if (i !== j) {
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+                renderBars([], [i, j]);
+                await new Promise(resolve => setTimeout(resolve, delay));
+            }
+        }
+    }
+    [arr[i + 1], arr[high]] = [arr[high], arr[i + 1]];
+    renderBars([], [i + 1, high]);
+    await new Promise(resolve => setTimeout(resolve, delay));
+
+    return i + 1;
+}
+
 
 /** ----------- -----------  Heap Sort ----------- ----------- */
