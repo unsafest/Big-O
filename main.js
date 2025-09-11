@@ -249,5 +249,45 @@ async function partition(arr, signal, low, high) {
     return i + 1;
 }
 
-
 /** ----------- -----------  Heap Sort ----------- ----------- */
+
+async function heapSort(arr, signal) {
+    // Build max-heap - start from last non-leaf node
+    for (let i = Math.floor(arr.length / 2) -1; i >= 0; i--) {
+        await heapify(arr, arr.length, i, signal);
+        if (signal.aborted) return;
+    }
+
+    // Extract elements from heap one by one
+    for (let i = arr.length -1; i > 0; i--) {
+        // Swap current root to end
+        [arr[0], arr[i]] = [arr[i], arr[0]];
+        // Heapify the reduced heap
+        await heapify(arr, i, 0, signal);
+        if (signal.aborted) return;
+        // Show only swaps
+        renderBars([], [0, i]);
+        await new Promise(resolve => setTimeout(resolve, delay));
+    }
+    renderBars();
+}
+
+async function heapify(arr, n, i, signal) {
+    let largest = i; // Assume current node is largest
+    const LEFT = 2 * i + 1; // Left child index
+    const RIGHT = 2 * i + 2; // Right child index
+
+    // Check if left child exists and is larger
+    if (LEFT < n && arr[LEFT] > arr[largest]) {
+        largest = LEFT;
+    }
+    // Check if right child exists and is larger
+    if (RIGHT < n && arr[RIGHT] > arr[largest]) {
+        largest = RIGHT;
+    }
+    // If largest is not in current node, swap and recurse 
+    if (largest !== i) {
+        [arr[i], arr[largest]] = [arr[largest], arr[i]]; // Swap
+        await heapify(arr, n, largest, signal); // Heapify the subtree
+    }
+}
