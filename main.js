@@ -141,69 +141,63 @@ async function insertionSort(array, signal) {
         while (j >= 0 && array[j] > key) {
             if (signal.aborted) return;
             array[j + 1] = array[j];
+            // Show each shift as a swap
+            renderBars([], [j, j + 1]);
+            await new Promise(resolve => setTimeout(resolve, delay));
             j--;
         }
         array[j + 1] = key;
-        // Show only final placement (like other algorithms show key operations)
-        renderBars([], [j + 1]);
-        await new Promise(resolve => setTimeout(resolve, delay));
     }
     renderBars();
 }
 
 /** ----------- -----------  Merge Sort ----------- ----------- */
-async function mergeSort(arr, signal, offset = 0) {
-    if (signal.aborted || arr.length <= 1) return;
+async function mergeSort(arr, signal, low = 0, high = arr.length - 1) {
+    if (signal.aborted || low >= high) return;
 
-    const middle = Math.floor(arr.length / 2);
-    const left = arr.slice(0, middle);
-    const right = arr.slice(middle);
+    const middle = Math.floor((low + high) / 2);
 
-    await mergeSort(left, signal, offset);
+    await mergeSort(arr, signal, low, middle);
     if (signal.aborted) return;
-    await mergeSort(right, signal, offset + middle);
+    
+    await mergeSort(arr, signal, middle + 1, high);
     if (signal.aborted) return;
 
-    await mergeArrays(arr, left, right, signal, offset);
+    await mergeArrays(arr, signal, low, middle, high);
 }
 
-async function mergeArrays(arr, left, right, signal, offset) {
-    let i = 0, j = 0, k = 0;
+async function mergeArrays(arr, signal, low, middle, high) {
+    if (signal.aborted) return;
 
-    while (i < left.length && j < right.length) {
+    const temp = new Array(high - low + 1);
+    let i = low, j = middle + 1, k = 0;
+
+    while (i <= middle && j <= high) {
         if (signal.aborted) return;
-        
-        if (left[i] < right[j]) {
-            arr[k] = left[i++];
+
+        if (arr[i] <= arr[j]) {
+            temp[k++] = arr[i++];
         } else {
-            arr[k] = right[j++];
+            temp[k++] = arr[j++];
         }
-        array[offset + k] = arr[k]
-        // Show only writes
-        renderBars([], [offset + k]);
-        await new Promise(resolve => setTimeout(resolve, delay));
-        k++
     }
-    // cleanup
-    while (i < left.length) {
+    while (i <= middle) {
         if (signal.aborted) return;
-        arr[k] = left[i++];
-        array[offset + k] = arr[k]
-        // Show only writes
-        renderBars([], [offset + k]);
-        await new Promise(resolve => setTimeout(resolve, delay));
-        k++;
+        temp[k++] = arr[i++];
     }
-    while (j < right.length) {
+    while (j <= high) {
         if (signal.aborted) return;
-        arr[k] = right[j++];
-        array[offset + k] = arr[k]
-        // Show only writes
-        renderBars([], [offset + k]);
-        await new Promise(resolve => setTimeout(resolve, delay));
-        k++;
+        temp[k++] = arr[j++];
     }
-    renderBars();
+    
+    // Copy back and show the merge operation as swaps
+    for (let m = 0; m < temp.length; m++) {
+        if (signal.aborted) return;
+        arr[low + m] = temp[m];
+    }
+    // Show the entire merged range as a swap operation
+    renderBars([], Array.from({length: high - low + 1}, (_, i) => low + i));
+    await new Promise(resolve => setTimeout(resolve, delay));
 }
 
 /** ----------- -----------  Quick Sort ----------- ----------- */
@@ -250,7 +244,6 @@ async function partition(arr, signal, low, high) {
 }
 
 /** ----------- -----------  Heap Sort ----------- ----------- */
-
 async function heapSort(arr, signal) {
     // Build max-heap - start from last non-leaf node
     for (let i = Math.floor(arr.length / 2) -1; i >= 0; i--) {
@@ -288,6 +281,8 @@ async function heapify(arr, n, i, signal) {
     // If largest is not in current node, swap and recurse 
     if (largest !== i) {
         [arr[i], arr[largest]] = [arr[largest], arr[i]]; // Swap
+        renderBars([], [i, largest]); // Show only swaps
+        await new Promise(resolve => setTimeout(resolve, delay));
         await heapify(arr, n, largest, signal); // Heapify the subtree
     }
 }
