@@ -3,24 +3,39 @@ let array = [];
 let arrLen = 51;
 const delay = 40;
 let controller = null; // for AbortController()
+let bars = []; 
 
 function generateArray(type) {
     array = Array.from({length: arrLen}, (_, i) => i + 1);
     if (type === "random") array.sort(() => Math.random() - 0.5);
     if (type === "reversed") array.reverse();
+
+    if (bars.length !== arrLen) {
+        visualizer.innerHTML = "";
+        bars = [];
+        for (let i = 0; i < arrLen; i++) {
+            const bar = document.createElement('div');
+            bar.classList.add('bar');
+            bar.style.width = `${100 / arrLen}%`;
+            visualizer.appendChild(bar);
+            bars.push(bar);
+        }
+    }
     renderBars();
 }
 
 function renderBars(compare = [], swap = []) {
-    visualizer.innerHTML = "";
-    array.forEach((value, idx) => {
-        const bar = document.createElement('div');
-        bar.classList.add('bar');
+    bars.forEach((bar, idx) => {
+        bar.style.transition = 'none';
+
+        bar.classList.remove("comparing", "swapping");
+
         if (compare.includes(idx)) bar.classList.add("comparing");
         if (swap.includes(idx)) bar.classList.add("swapping");
-        bar.style.height = `${(value / array.length) * 100}%`;
-        bar.style.width = `${100 / array.length}%`;
-        visualizer.appendChild(bar);
+        
+        bar.style.height = `${(array[idx] / arrLen) * 100}%`;
+
+        bar.offsetHeight;
     });
 }
 
@@ -153,6 +168,7 @@ async function insertionSort(array, signal) {
 
 /** ----------- -----------  Merge Sort ----------- ----------- */
 async function mergeSort(arr, signal, low = 0, high = arr.length - 1) {
+    if (high === null) high = arr.length - 1;
     if (signal.aborted || low >= high) return;
 
     const middle = Math.floor((low + high) / 2);
@@ -194,10 +210,10 @@ async function mergeArrays(arr, signal, low, middle, high) {
     for (let m = 0; m < temp.length; m++) {
         if (signal.aborted) return;
         arr[low + m] = temp[m];
+        renderBars([], [low + m]);
+        await new Promise(resolve => setTimeout(resolve, delay));
     }
-    // Show the entire merged range as a swap operation
-    renderBars([], Array.from({length: high - low + 1}, (_, i) => low + i));
-    await new Promise(resolve => setTimeout(resolve, delay));
+    renderBars();
 }
 
 /** ----------- -----------  Quick Sort ----------- ----------- */
@@ -218,7 +234,7 @@ async function partition(arr, signal, low, high) {
     const randomIndex = Math.floor(Math.random() * (high - low + 1)) + low;
     [arr[randomIndex], arr[high]] = [arr[high], arr[randomIndex]];
 
-    renderBars([], [randomIndex, high]);
+    renderBars([], [low, high]);
     await new Promise(resolve => setTimeout(resolve, delay));
 
     let pivot = arr[high];
