@@ -3,7 +3,16 @@ let array = [];
 let arrLen = 51;
 const delay = 40;
 let controller = null; // for AbortController()
-let bars = []; 
+let bars = []; // cache for bar elements
+const ALGOSTEPS = {
+        bubble: [...array],
+        selection: [...array],
+        insertion: [...array],
+        merge: [...array],
+        quick: [...array],
+        heap: [...array]
+}; // Store steps for each algorithm
+
 
 function generateArray(type) {
     array = Array.from({length: arrLen}, (_, i) => i + 1);
@@ -90,12 +99,28 @@ function sort() {
     }
 }
 
+async function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 function reset() {
     if (controller) controller.abort();
     controller = null;
     const type = getSelectedRadioValue("arrayType") || "random";
     generateArray(type);
     renderBars();
+}
+
+function runAllAlgorithms() {
+    if (window.Worker) {
+        const worker = new Worker("worker.js");
+        worker.postMessage({ array: [...array] });
+    };
+}
+
+function animateSteps() {
+    if (!ALGOSTEPS.size) return;
+
 }
 
 /** ----------- -----------  Sorting Algorithms ----------- ----------- */
@@ -111,7 +136,7 @@ async function bubbleSort(array, signal) {
 
             if (array[j] > array[j + 1]) {
                 [array[j], array[j + 1]] = [array[j + 1], array[j]];
-                // Show only swaps
+
                 renderBars([], [j, j + 1]);
                 await new Promise(resolve => setTimeout(resolve, delay));
                 swapped = true
@@ -139,7 +164,7 @@ async function selectionSort(array, signal) {
         if (minIndex !== i) {
             [array[i], array[minIndex]] = [array[minIndex], array[i]];
             renderBars([], [i, minIndex]);
-            await new Promise(resolve => setTimeout(resolve, delay));
+            await sleep(delay);
         }
     }
     renderBars();
@@ -150,18 +175,15 @@ async function insertionSort(array, signal) {
     let n = array.length;
     for (let i = 1; i < n; i++) {
         if (signal.aborted) return;
-        let key = array[i]
-        let j = i - 1; 
+        let j = i; 
 
-        while (j >= 0 && array[j] > key) {
+        while (j >= 0 && array[j - 1] > array[j]) {
             if (signal.aborted) return;
-            array[j + 1] = array[j];
-            // Show each shift as a swap
-            renderBars([], [j, j + 1]);
-            await new Promise(resolve => setTimeout(resolve, delay));
+            [array[j], array[j - 1]] = [array[j - 1], array[j]];
+            renderBars([], [j, j - 1]);
+            await sleep(delay);
             j--;
         }
-        array[j + 1] = key;
     }
     renderBars();
 }
