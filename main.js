@@ -94,6 +94,9 @@ function sort() {
         case "heap":
             heapSort(array, signal);
             break;
+        case "all":
+            runAllAlgorithms();
+            break;
         default:
             break;
     }
@@ -113,8 +116,17 @@ function reset() {
 
 function runAllAlgorithms() {
     if (window.Worker) {
-        const worker = new Worker("worker.js");
-        worker.postMessage({ array: [...array] });
+        const ARR = [...array]
+        const algorithms = ['bubble', 'selection', 'insertion', 'merge', 'quick', 'heap'];
+
+        algorithms.forEach(algorithm => {
+            const worker = new Worker("worker.js");
+            
+            worker.postMessage({
+                algorithm: algorithm,
+                array: ARR
+            });
+        });
     };
 }
 
@@ -138,7 +150,7 @@ async function bubbleSort(array, signal) {
                 [array[j], array[j + 1]] = [array[j + 1], array[j]];
 
                 renderBars([], [j, j + 1]);
-                await new Promise(resolve => setTimeout(resolve, delay));
+                await sleep(delay);
                 swapped = true
             }
         }
