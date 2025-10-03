@@ -2,16 +2,9 @@ const visualizer = document.getElementById("visualizer");
 let array = [];
 let arrLen = 51;
 const delay = 40;
+const compDelay = 5;
 let controller = null; // for AbortController()
 let bars = []; // cache for bar elements
-const ALGOSTEPS = {
-        bubble: [...array],
-        selection: [...array],
-        insertion: [...array],
-        merge: [...array],
-        quick: [...array],
-        heap: [...array]
-}; // Store steps for each algorithm
 
 
 function generateArray(type) {
@@ -126,13 +119,22 @@ function runAllAlgorithms() {
                 algorithm: algorithm,
                 array: ARR
             });
+
+            worker.onmessage = async function(event) {
+                const { type, compare, swap } = event.data;
+
+                if (type === 'step') {
+                    renderBars(compare, swap);
+                } else if ( type === 'complete') {
+                    renderBars();
+                    worker.terminate();
+                }
+            }
+            worker.onerror = function(error) {
+                console.error(`Error in ${algorithm} worker:`, error.message);
+            }
         });
     };
-}
-
-function animateSteps() {
-    if (!ALGOSTEPS.size) return;
-
 }
 
 /** ----------- -----------  Sorting Algorithms ----------- ----------- */
