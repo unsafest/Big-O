@@ -5,6 +5,7 @@ const delay = 40;
 const compDelay = 5;
 let controller = null; // for AbortController()
 let bars = []; // cache for bar elements
+const algorithms = ['bubble', 'selection', 'insertion', 'merge', 'quick', 'heap'];
 
 
 function generateArray(type) {
@@ -107,10 +108,64 @@ function reset() {
     renderBars();
 }
 
+function buildMultiVisualizerContainer(ARRAY) {
+    visualizer.innerHTML = "";
+    visualizer.style.display = "grid";
+    visualizer.style.gridTemplateColumns = "repeat(3, 1fr)";
+    visualizer.style.gap = "20px";
+    visualizer.style.height = "auto";
+
+    const visualizers = new Map();
+
+    algorithms.forEach(algo => {
+        const container = document.createElement("div");
+        container.style.border = "1px solid #ccc";
+        container.style.padding = "10px";
+        container.style.boxSizing = "border-box";
+
+        const title = document.createElement("h3")
+        title.textContent = algo.charAt(0).toUpperCase() + algo.slice(1) + " Sort";
+        title.style.textAlign = "center";
+        container.appendChild(title);
+
+        const vizContainer = document.createElement("div");
+        vizContainer.style.display = "flex";
+        vizContainer.style.alignItems = "flex-end";
+        vizContainer.style.height = "200px";
+        vizContainer.style.position = "relative";
+        vizContainer.style.width = "100%";
+        vizContainer.style.border = "1px solid #000";
+        vizContainer.style.backgroundColor = "#f9f9f9";
+        container.appendChild(vizContainer);
+        
+        visualizer.appendChild(container);
+
+        const algoBars = [];
+        const algoArray = [...ARRAY];
+
+        for (let i = 0; i < arrLen; i++) {
+            const bar = document.createElement("div");
+            bar.classList.add("bar");
+            bar.style.width = `${100 / arrLen}%`;
+            bar.style.height = `${(algoArray[i] / arrLen) * 100}%`;
+            bar.style.transition = "none";
+            vizContainer.appendChild(bar);
+            algoBars.push(bar);
+        }
+
+        visualizers.set(algo, {
+            bars: algoBars,
+            array: algoArray
+        });
+    });
+    // Returns map of visualizers, so that each algorithm can access its own bars and array
+    return visualizers;
+}
+
 function runAllAlgorithms() {
     if (window.Worker) {
         const ARR = [...array]
-        const algorithms = ['bubble', 'selection', 'insertion', 'merge', 'quick', 'heap'];
+        const visualizers = buildMultiVisualizerContainer(ARR);
 
         algorithms.forEach(algorithm => {
             const worker = new Worker("worker.js");
@@ -122,6 +177,8 @@ function runAllAlgorithms() {
 
             worker.onmessage = async function(event) {
                 const { type, compare, swap } = event.data;
+                const viz = visualizers.get(algorithm);
+                
 
                 if (type === 'step') {
                     renderBars(compare, swap);

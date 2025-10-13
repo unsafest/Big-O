@@ -1,3 +1,10 @@
+const compareDelay = 5;
+const swapDelay = 40;
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 self.onmessage = async function(event) {
     const { algorithm, array } = event.data;
 
@@ -46,12 +53,14 @@ async function bubbleSortWorker(arr) {
         for(let j = 0; j < n - i -1; j++) {
             comparisons++;
             await sendStep('bubble', [j, j + 1], []);
+            await sleep(compareDelay);
             
             if(arr[j] > arr[j + 1]) {
                 [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
                 swaps++;
                 swapped = true;
                 await sendStep('bubble', [], [j, j + 1]);
+                await sleep(swapDelay);
             }
         }
         if(!swapped) break;
@@ -81,7 +90,8 @@ async function selectionSortWorker(arr) {
         for (let j = i + 1; j < n; j++) {
             comparisons++;
             await sendStep('selection', [minIndex, j], []);
-            
+            await sleep(compareDelay);
+
             if (arr[j] < arr[minIndex]) {
                 minIndex = j;
             }
@@ -90,6 +100,7 @@ async function selectionSortWorker(arr) {
             [arr[i], arr[minIndex]] = [arr[minIndex], arr[i]];
             swaps++;
             await sendStep('selection', [], [i, minIndex]);
+            await sleep(swapDelay);
         }
     }
     const END = performance.now();
@@ -116,11 +127,13 @@ async function insertionSortWorker(arr) {
         while (j > 0) {
             comparisons++;
             await sendStep('insertion', [j - 1, j], []);
-            
+            await sleep(compareDelay);
+
             if (arr[j - 1] > arr[j]) {
                 [arr[j], arr[j - 1]] = [arr[j - 1], arr[j]];
                 swaps++;
                 await sendStep('insertion', [], [j - 1, j]);
+                await sleep(swapDelay);
                 j--;
             } else {
                 break;
@@ -161,6 +174,7 @@ async function mergeSortWorker(arr) {
         while (i <= middle && j <= high) {
             comparisons++;
             await sendStep('merge', [i, j], []);
+            await sleep(compareDelay);
             
             if (arr[i] <= arr[j]) {
                 temp[k++] = arr[i++];
@@ -179,10 +193,11 @@ async function mergeSortWorker(arr) {
         for (let m = 0; m < temp.length; m++) {
             arr[low + m] = temp[m];
             await sendStep('merge', [], [low + m]);
+            await sleep(swapDelay);
         }
     }
 
-    mergeSortRecursive(arr, 0, arr.length - 1);
+    await mergeSortRecursive(arr, 0, arr.length - 1);
     const END = performance.now();
 
     self.postMessage({
@@ -214,6 +229,7 @@ async function quickSortWorker(arr) {
         [arr[randomIndex], arr[high]] = [arr[high], arr[randomIndex]];
         swaps++;
         await sendStep('quick', [], [randomIndex, high]);
+        await sleep(swapDelay);
 
         let pivot = arr[high];
         let i = low - 1;
@@ -221,6 +237,7 @@ async function quickSortWorker(arr) {
         for (let j = low; j < high; j++) {
             comparisons++;
             await sendStep('quick', [j, high], []);
+            await sleep(compareDelay);
             
             if (arr[j] < pivot) {
                 i++;
@@ -228,16 +245,18 @@ async function quickSortWorker(arr) {
                     [arr[i], arr[j]] = [arr[j], arr[i]];
                     swaps++;
                     await sendStep('quick', [], [i, j]);
+                    await sleep(swapDelay);
                 }
             }
         }
         [arr[i + 1], arr[high]] = [arr[high], arr[i + 1]];
         swaps++;
         await sendStep('quick', [], [i + 1, high]);
+        await sleep(swapDelay);
         return i + 1;
     }
 
-    quickSortRecursive(arr, 0, arr.length - 1);
+    await quickSortRecursive(arr, 0, arr.length - 1);
     const END = performance.now();
 
     self.postMessage({
@@ -264,6 +283,7 @@ async function heapSortWorker(arr) {
         if (LEFT < n) {
             comparisons++;
             await sendStep('heap', [LEFT, largest], []);
+            await sleep(compareDelay);
             
             if (arr[LEFT] > arr[largest]) {
                 largest = LEFT;
@@ -272,6 +292,7 @@ async function heapSortWorker(arr) {
         if (RIGHT < n) {
             comparisons++;
             await sendStep('heap', [RIGHT, largest], []);
+            await sleep(compareDelay);
             
             if (arr[RIGHT] > arr[largest]) {
                 largest = RIGHT;
@@ -282,6 +303,7 @@ async function heapSortWorker(arr) {
             [arr[i], arr[largest]] = [arr[largest], arr[i]];
             swaps++;
             await sendStep('heap', [], [i, largest]);
+            await sleep(swapDelay);
             await heapify(arr, n, largest);
         }
     }
@@ -296,6 +318,7 @@ async function heapSortWorker(arr) {
         [arr[0], arr[i]] = [arr[i], arr[0]];
         swaps++;
         await sendStep('heap', [], [0, i]);
+        await sleep(swapDelay);
         await heapify(arr, i, 0);
     }
 
