@@ -176,7 +176,7 @@ function runAllAlgorithms() {
             });
 
             worker.onmessage = async function(event) {
-                const { type, compare, swap } = event.data;
+                const { type, compare, swap, updates } = event.data;
                 const viz = visualizers.get(algorithm);
 
                 if (!viz) return; 
@@ -185,6 +185,11 @@ function runAllAlgorithms() {
                     if (swap && swap.length === 2) {
                         const [i, j] = swap;
                         [viz.array[i], viz.array[j]] = [viz.array[j], viz.array[i]];
+                    }
+                    if (updates && updates.length > 0) {
+                        updates.forEach(({index, value}) => {
+                            viz.array[index] = value;
+                        })
                     }
                     renderBars(compare, swap, viz.bars, viz.array);
                 } else if ( type === 'complete') {

@@ -33,12 +33,13 @@ self.onmessage = async function(event) {
     }
 }
 
-async function sendStep(algorithm, compare = [], swap = []) {
+async function sendStep(algorithm, compare = [], swap = [], updates = []) {
     self.postMessage({
         algorithm, 
         type: 'step',
         compare,
-        swap
+        swap,
+        updates
     });
 }
 
@@ -69,7 +70,7 @@ async function bubbleSortWorker(arr) {
     const END = performance.now();
 
     self.postMessage({
-        algorithm,
+        algorithm: 'bubble',
         type: 'complete',
         result: {
             time: END - START,
@@ -192,7 +193,7 @@ async function mergeSortWorker(arr) {
 
         for (let m = 0; m < temp.length; m++) {
             arr[low + m] = temp[m];
-            await sendStep('merge', [], [low + m]);
+            await sendStep('merge', [], [], [{index: low + m, value: temp[m]}]);
             await sleep(swapDelay);
         }
     }
