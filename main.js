@@ -27,8 +27,8 @@ function generateArray(type) {
     renderBars();
 }
 
-function renderBars(compare = [], swap = []) {
-    bars.forEach((bar, idx) => {
+function renderBars(compare = [], swap = [], targetBars = bars, targetArray = array) {
+    targetBars.forEach((bar, idx) => {
         bar.style.transition = 'none';
 
         bar.classList.remove("comparing", "swapping");
@@ -36,7 +36,7 @@ function renderBars(compare = [], swap = []) {
         if (compare.includes(idx)) bar.classList.add("comparing");
         if (swap.includes(idx)) bar.classList.add("swapping");
         
-        bar.style.height = `${(array[idx] / arrLen) * 100}%`;
+        bar.style.height = `${(targetArray[idx] / arrLen) * 100}%`;
 
         bar.offsetHeight;
     });
@@ -178,12 +178,17 @@ function runAllAlgorithms() {
             worker.onmessage = async function(event) {
                 const { type, compare, swap } = event.data;
                 const viz = visualizers.get(algorithm);
-                
+
+                if (!viz) return; 
 
                 if (type === 'step') {
-                    renderBars(compare, swap);
+                    if (swap && swap.length === 2) {
+                        const [i, j] = swap;
+                        [viz.array[i], viz.array[j]] = [viz.array[j], viz.array[i]];
+                    }
+                    renderBars(compare, swap, viz.bars, viz.array);
                 } else if ( type === 'complete') {
-                    renderBars();
+                    renderBars([],[], viz.bars, viz.array);
                     worker.terminate();
                 }
             }

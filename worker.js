@@ -1,4 +1,4 @@
-const compareDelay = 5;
+const compareDelay = 10;
 const swapDelay = 40;
 
 function sleep(ms) {
