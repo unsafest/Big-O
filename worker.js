@@ -43,6 +43,9 @@ async function sendStep(algorithm, compare = [], swap = [], updates = []) {
     });
 }
 
+/* ---------- ----------  Sorting Algorithms ---------- ---------- */
+
+/* ---------- ----------  Bubble Sort ---------- ---------- */
 async function bubbleSortWorker(arr) {
     const START = performance.now();
     let comparisons = 0;
@@ -79,7 +82,7 @@ async function bubbleSortWorker(arr) {
         }
     })
 }
-
+/* ---------- ----------  Selection Sort ---------- ---------- */
 async function selectionSortWorker(arr) {
     const START = performance.now();
     let comparisons = 0;
@@ -116,7 +119,7 @@ async function selectionSortWorker(arr) {
         }
     });
 }
-
+/* ---------- ----------  Insertion Sort ---------- ---------- */
 async function insertionSortWorker(arr) {
     const START = performance.now();
     let comparisons = 0;
@@ -153,7 +156,7 @@ async function insertionSortWorker(arr) {
         }
     });
 }
-
+/* ---------- ----------  Merge Sort ---------- ---------- */
 async function mergeSortWorker(arr) {
     const START = performance.now();
     let comparisons = 0;
@@ -211,7 +214,7 @@ async function mergeSortWorker(arr) {
         }
     });
 }
-
+/* ---------- ----------  Quick Sort ---------- ---------- */
 async function quickSortWorker(arr) {
     const START = performance.now();
     let comparisons = 0;
@@ -270,7 +273,7 @@ async function quickSortWorker(arr) {
         }
     });
 }
-
+/* ---------- ----------  Heap Sort ---------- ---------- */
 async function heapSortWorker(arr) {
     const START = performance.now();
     let comparisons = 0;
