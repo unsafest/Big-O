@@ -24,4 +24,4 @@ An interactive web app that lets you watch sorting algorithms do their thing in 
 
 ## Usage
 
-Just open `index.html` in your browser. No build step, no dependencies, no fuss.
+Just open `index.html` in your browser. No build step, no dependencies.
